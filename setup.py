@@ -20,6 +20,7 @@ setup(name='oration',
       install_requires=[
           # -*- Extra requirements: -*-
           "twitter >= 1.9",
+          "google-api-python-client",
       ],
       entry_points="""
       # -*- Entry points: -*-
