@@ -19,6 +19,7 @@ setup(name='oration',
       zip_safe=False,
       install_requires=[
           # -*- Extra requirements: -*-
+          "html5lib",
           "lxml",
           "twitter >= 1.9",
           "google-api-python-client",
