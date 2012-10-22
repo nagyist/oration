@@ -14,6 +14,7 @@ from lxml.html import html5parser
 
 
 import docs
+import tweets
 
 from settings import *
 
@@ -67,6 +68,10 @@ def build_html():
     # Collect all the Google Docs in the Folder as HTML
     children = docs.folder_contents(service)
     sorted_children = sorted(children, key=lambda x: x['createdDate'])
+    start = sorted_children[0]['createdDate']
+    end = sorted_children[-1]['createdDate']
+    matching_tweets = tweets.hashtag_search_in_daterange(start, end)
+    log.info("Matching tweets: %s" % matching_tweets)
     for child in sorted_children:
         log.info(u"Appending slide %s" % child['title'])
         slide = html5parser.fromstring(docs.export_file(service, child))
