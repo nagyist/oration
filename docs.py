@@ -51,7 +51,6 @@ def setup_api_service():
 def export_file(service, g_file):
     download_url = g_file['exportLinks']['text/html']
     resp, content = service._http.request(download_url)
-    log.debug(content)
     return content
 
 def folder_contents(service, folder_id=GOOGLE_FOLDER_ID):

@@ -17,7 +17,12 @@ import docs
 
 from settings import *
 
-NSS = {"x": "http://www.w3.org/1999/xhtml"}
+XHTML_NAMESPACE = "http://www.w3.org/1999/xhtml"
+XHTML = "{%s}" % XHTML_NAMESPACE
+
+NSMAP = {None : XHTML_NAMESPACE} 
+NSS = {"x": XHTML_NAMESPACE}
+
 HTML_TEMPLATE = """<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <title>#bib12 Oration Output</title>
@@ -25,10 +30,13 @@ HTML_TEMPLATE = """<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
     <meta name="description" content="Annotated transcript of The self-publishing book: Books in Browsers 2012 presentation" />
     <meta name="author" content="Liza Daly, Keith Fahlgren"/>
       
-    <link rel="stylesheet" href="reveal/css/reveal.css"/>
     <link rel="stylesheet" href="reveal/css/theme/simple.css" id="theme"/>
 
-    <link rel="stylesheet" href="reveal/lib/css/zenburn.css"/>
+    <link rel="stylesheet" href="foundation/stylesheets/foundation.min.css" />
+    <link rel="stylesheet" href="foundation/stylesheets/app.css"/>
+
+    <script src="foundation/javascripts/modernizr.foundation.js">
+    </script>
   </head>
 
   <body>
@@ -58,13 +66,19 @@ def build_html():
     body = html.xpath("/x:html/x:body", namespaces=NSS)[0]
     # Collect all the Google Docs in the Folder as HTML
     children = docs.folder_contents(service)
-    children.reverse()
-    for child in children:
+    sorted_children = sorted(children, key=lambda x: x['createdDate'])
+    for child in sorted_children:
+        log.info(u"Appending slide %s" % child['title'])
         slide = html5parser.fromstring(docs.export_file(service, child))
         slide_body = slide.xpath("/x:html/x:body", namespaces=NSS)[0]
+        section = etree.Element(XHTML + "section", nsmap=NSMAP) 
+        section.set("data-ts", child['createdDate'])
+        section.set("class", "row six columns")
+
         #log.debug(etree.tostring(slide))
         for slide_body_child in slide_body:
-            body.append(slide_body_child)
+            section.append(slide_body_child)
+        body.append(section)
 
     # Collect all the relevant tweets and try to line them up
     return html
