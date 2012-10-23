@@ -31,8 +31,8 @@ def hashtag_search_in_daterange(start, end):
         log.debug("%s v %s v %s" % (start, when, end))
         if when > start and when < end:
             tweet = {'text': tweet['text'],
-                    'avatar': avatar,
-                    'when': when}
+                     'avatar': avatar,
+                     'when': when}
             tweets.append(tweet)
     return tweets
 
