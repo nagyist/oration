@@ -68,27 +68,92 @@ def build_html():
     # Collect all the Google Docs in the Folder as HTML
     children = docs.folder_contents(service)
     sorted_children = sorted(children, key=lambda x: x['createdDate'])
+
     start = sorted_children[0]['createdDate']
-    end = sorted_children[-1]['createdDate']
-    matching_tweets = tweets.hashtag_search_in_daterange(start, end)
-    log.info("Matching tweets: %s" % matching_tweets)
-    for child in sorted_children:
+    last_start = sorted_children[-1]['createdDate']
+    # Add a minute to 2012-10-21T18:18:45.610Z
+    last_start_split = last_start.split(":")
+    add_two_minutes = str(float(last_start_split[2].rstrip("Z")) + 2)
+    end = ":".join([last_start_split[0], last_start_split[1], add_two_minutes]) + "Z"
+    tweet_search_results = tweets.hashtag_search_in_daterange(start, end)
+
+    for i, child in enumerate(sorted_children):
         log.info(u"Appending slide %s" % child['title'])
         slide = html5parser.fromstring(docs.export_file(service, child))
+        created_time = child['createdDate']
         slide_body = slide.xpath("/x:html/x:body", namespaces=NSS)[0]
         section = etree.Element(XHTML + "section", nsmap=NSMAP) 
-        section.set("data-ts", child['createdDate'])
-        section.set("class", "row six columns")
+        section.set("data-ts", created_time )
+        section.set("class", "row")
+
+        comments_div = etree.SubElement(section, XHTML + "div", nsmap=NSMAP) 
+        comments_div.set("class", "comments three columns")
+        comments_div.text = " "
+
+        slide_div = etree.SubElement(section, XHTML + "div", nsmap=NSMAP)
+        slide_div.set("class", "slide six columns")
+
+        tweets_div = etree.SubElement(section, XHTML + "div", nsmap=NSMAP) 
+        tweets_div.set("class", "tweets three columns")
+        tweets_div.text = " "
 
         #log.debug(etree.tostring(slide))
         for slide_body_child in slide_body:
-            section.append(slide_body_child)
+            num_comments = len(slide_body_child.xpath(".//x:a[starts-with(@href, '#cmnt_ref')]", namespaces=NSS))
+            if num_comments > 0:
+                comments_div.append(slide_body_child)
+            else:
+                slide_div.append(slide_body_child)
+
+
+        next_created_time = None
+        try:
+            next_created_time = sorted_children[i + 1]['createdDate']
+        except IndexError:
+            pass
+
+        slide_tweets = _match_tweets(tweet_search_results, created_time, next_created_time)
+        log.debug("Matching tweets for slide %s [%s]: %s" % (i, created_time, slide_tweets))
+
+        #if i % 2:
+        #    if i == 3:
+        #        slide_tweets = [{'text': u'This is totally not a test tweet #bib12', 'when': created_time, 'avatar': u'https://twimg0-a.akamaihd.net/profile_images/1884823295/k_baylands_sq_normal.jpg'},
+        #                        {'text': u'Neither is this. @abdelazer: This is totally not a test tweet #bib12', 'when': created_time, 'avatar': u'https://si0.twimg.com/profile_images/1448591106/liza-headshot-light-square_normal.jpg'}]
+        #    else:
+        #        slide_tweets = [{'text': u'Neither is this. @abdelazer: This is totally not a test tweet #bib12', 'when': created_time, 'avatar': u'https://si0.twimg.com/profile_images/1448591106/liza-headshot-light-square_normal.jpg'}]
+
+
+        for tweet in slide_tweets:
+            p = etree.SubElement(tweets_div, XHTML + "p", nsmap=NSMAP)
+            p.set("class", "tweet")
+            txt = etree.SubElement(p, XHTML + "span", nsmap=NSMAP)
+            txt.text = tweet['text']
+            txt.set("class", "tweet-text")
+            when = etree.SubElement(p, XHTML + "span", nsmap=NSMAP)
+            when.text = tweet['when']
+            when.set("class", "tweet-when")
+            avatar = etree.SubElement(p, XHTML + "img", nsmap=NSMAP)
+            avatar.set("src", tweet['avatar'])
+            avatar.set("class", "tweet-avatar")
+
+
         body.append(section)
+
+
 
     # Collect all the relevant tweets and try to line them up
     return html
 
 
+def _match_tweets(the_tweets, start, end=None):
+    matches = []
+    for tweet in the_tweets:
+        when = tweet['when']
+        if when >= start and end is None:
+            matches.append(tweet)
+        elif when >= start and when < end:
+            matches.append(tweet)
+    return matches
 
 
 

@@ -15,6 +15,8 @@ from settings import *
 TWITTER_WTF_DATE_FMT = "%a, %d %b %Y %H:%M:%S +0000"
 UNIX_TIMESTAMP = "%Y-%m-%dT%H:%M:%S.%fZ"
 
+class AllTweetsFoundError(Exception): pass # dirty hack
+
 log = logging.getLogger(__name__)
 
 logging.basicConfig(level=logging.DEBUG)
@@ -48,6 +50,9 @@ def iterate_search_pages(query, num_pages=10):
 def iterate_valid_tweets(tweets, min_time=MIN_TIME, max_time=MAX_TIME):
     for tweet in tweets:
         when = datetime.datetime.strptime(tweet['created_at'], TWITTER_WTF_DATE_FMT).isoformat('T')
+        if when < min_time:
+            log.debug("STOPPING for %s v %s" % (when, max_time))
+            raise AllTweetsFoundError
         if when >= min_time and when <= max_time:
             log.debug("%s v %s v %s" % (min_time, when, max_time))
             yield tweet
@@ -55,17 +60,18 @@ def iterate_valid_tweets(tweets, min_time=MIN_TIME, max_time=MAX_TIME):
 def hashtag_search_in_daterange(start, end):
     tweets = []
     for tweet_page in iterate_search_pages(TWITTER_HASHTAG):
-        for valid_tweet in iterate_valid_tweets(tweet_page, min_time=start, max_time=end):
-            avatar = valid_tweet['profile_image_url_https']
-            when = datetime.datetime.strptime(valid_tweet['created_at'],
-                    TWITTER_WTF_DATE_FMT).isoformat('T')
+        try:
+            for valid_tweet in iterate_valid_tweets(tweet_page, min_time=start, max_time=end):
+                avatar = valid_tweet['profile_image_url_https']
+                when = datetime.datetime.strptime(valid_tweet['created_at'],
+                        TWITTER_WTF_DATE_FMT).isoformat('T')
 
-            # INFO:tweets:@naypinya Looking forward to the Books in Browsers conference. @RedBridgePress #bib12 at 2012-10-17T16:39:51
-            # INFO:tweets:RT @gunzalis: @raffers @dinoboy89 @samatlounge I am not. I'm sweating my #bib12 talk instead in NorCal. at 2012-10-17T16:17:48
-            tweet = {'text': valid_tweet['text'],
-                     'avatar': avatar,
-                     'when': when}
-            tweets.append(tweet)
+                # INFO:tweets:@naypinya Looking forward to the Books in Browsers conference. @RedBridgePress #bib12 at 2012-10-17T16:39:51
+                # INFO:tweets:RT @gunzalis: @raffers @dinoboy89 @samatlounge I am not. I'm sweating my #bib12 talk instead in NorCal. at 2012-10-17T16:17:48
+                tweet = {'text': valid_tweet['text'],
+                        'avatar': avatar,
+                        'when': when}
+                tweets.append(tweet)
+        except AllTweetsFoundError:
+            break
     return tweets
-
-
