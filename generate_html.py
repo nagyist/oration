@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
+import datetime
 import logging
+import subprocess
 import sys
 
 from optparse import OptionParser
@@ -267,6 +269,13 @@ def build_html():
     # Collect all the relevant tweets and try to line them up
     return html
 
+def _git_publish(fn):
+    subprocess.call(["git", 
+                     "commit", 
+                     "-m'Automated commit from oration.generate_html at %s'" % datetime.datetime.utcnow().isoformat(),
+                     fn])
+    subprocess.call(["git", 
+                     "push"])
 
 def _match_tweets(the_tweets, start, end=None):
     matches = []
@@ -280,6 +289,7 @@ def _match_tweets(the_tweets, start, end=None):
 
 
 
+
 if __name__ == "__main__":
     args = sys.argv[1:]
 
@@ -287,6 +297,7 @@ if __name__ == "__main__":
 
     parser = OptionParser(usage)
 
+    parser.add_option("-c", "--continuous", action="store_true", dest="continuous", help="Run the code generation and commiting continuously")
     parser.add_option("-g", "--get-api-code", action="store_true", dest="get_api_code", help="Generate a new API code")
 
     (options, args) = parser.parse_args(args)    
@@ -298,9 +309,20 @@ if __name__ == "__main__":
         docs.save_credentials(code)
 
         sys.exit(0)
+    elif options.continuous:
+        while True:
+            html_content = build_html()
+            with open(EXPORT_FILENAME, "w") as f:
+                et = etree.ElementTree(html_content)
+                et.write(f, pretty_print=True)
+
+            _git_publish(EXPORT_FILENAME)
+
+
+
     else:
         html_content = build_html()
         with open(EXPORT_FILENAME, "w") as f:
             et = etree.ElementTree(html_content)
-            et.write(f)
+            et.write(f, pretty_print=True)
 

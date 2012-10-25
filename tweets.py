@@ -30,11 +30,11 @@ MAX_TIME = datetime.datetime(2012, 10, 23, 4, 10, 10, 550).isoformat('T')
 search_url = "http://{}/search.json".format(TWITTER_SEARCH_DOMAIN)
 
 def hackhackhack(next_page):
-    response = urllib2.urlopen("{}{}".format(search_url, next_page))
+    response = urllib2.urlopen("{}{}&rpp=100".format(search_url, next_page))
     data = response.read()
     return json.loads(data)
 
-def iterate_search_pages(query, num_pages=10):
+def iterate_search_pages(query, num_pages=20):
     '''iterate over all pages of a tweet query 
     be careful though! The potential for lots of API calls
     '''
