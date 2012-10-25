@@ -31,6 +31,8 @@ HTML_TEMPLATE = """<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
     <meta name="description" content="Annotated transcript of The self-publishing book: Books in Browsers 2012 presentation" />
     <meta name="author" content="Liza Daly, Keith Fahlgren"/>
       
+    <link href='http://fonts.googleapis.com/css?family=Lato' rel='stylesheet' type='text/css' />
+
     <link rel="stylesheet" href="reveal/css/theme/simple.css" id="theme"/>
 
     <link rel="stylesheet" href="foundation/stylesheets/foundation.min.css" />
@@ -220,6 +222,13 @@ def build_html():
             p = etree.SubElement(tweets_div, XHTML + "p", nsmap=NSMAP)
             p.set("class", "tweet")
 
+            avatar = etree.SubElement(p, XHTML + "a", nsmap=NSMAP)
+            avatar.set("href", tweet["from_url"])
+            avatar.set("class", "tweet-avatar")
+            avatar_img = etree.SubElement(avatar, XHTML + "img", nsmap=NSMAP)
+            avatar_img.set("src", tweet['avatar'])
+
+
             who = etree.SubElement(p, XHTML + "span", nsmap=NSMAP)
             who.set("class", "tweet-who")
             who_a = etree.SubElement(who, XHTML + "a", nsmap=NSMAP)
@@ -249,12 +258,6 @@ def build_html():
             when_a = etree.SubElement(when, XHTML + "a", nsmap=NSMAP)
             when_a.set("href", tweet['permalink'])
             when_a.text = tweet['when']
-
-            avatar = etree.SubElement(p, XHTML + "a", nsmap=NSMAP)
-            avatar.set("href", tweet["from_url"])
-            avatar.set("class", "tweet-avatar")
-            avatar_img = etree.SubElement(avatar, XHTML + "img", nsmap=NSMAP)
-            avatar_img.set("src", tweet['avatar'])
 
 
         body.append(section)
