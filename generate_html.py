@@ -5,6 +5,7 @@ import datetime
 import logging
 import subprocess
 import sys
+import time
 
 from optparse import OptionParser
 
@@ -42,54 +43,21 @@ HTML_TEMPLATE = """<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 
     <script src="foundation/javascripts/modernizr.foundation.js">
     </script>
+    <script src="foundation/javascripts/sbo.js">
+    </script>
     <script type="text/javascript">
     <![CDATA[
-
-        var refresh, 
-	    refreshCookieName = "refresh", 
-	    refreshCookieCount = 10, 
-	    secondsUntilRefresh = 60;
-	// Thanks, PPK!
-	function createCookie(name,value,days) {
-		var expires, date = new Date();
-		if (days) {
-			date.setTime(date.getTime()+(days*24*60*60*1000));
-			expires = "; expires="+date.toGMTString();
-		}
-		else {
-			expires = "";
-		}
-		document.cookie = name+"="+value+expires+"; path=/";
-    }
-
-	function readCookie(name) {
-		var nameEQ = name + "=",
-		    ca = document.cookie.split(';');
-		for(i=0;i < ca.length;i++) {
-
-			var c = ca[i];
-			while (c.charAt(0)==' ') {
-				c = c.substring(1,c.length);
-			}
-			if (c.indexOf(nameEQ) === 0) {
-				return c.substring(nameEQ.length,c.length);
-			}
-		}
-		return null;
-	}
-	refresh = readCookie(refreshCookieName);
-	if (refresh === null) {
-		refresh = refreshCookieCount;
-	}
-	else {
-		refresh -= 1;
-	}
-	createCookie(refreshCookieName, refresh, 1);
-        if (refresh > 0) {
-		setTimeout(function () {
-			location.href = location.href;
-			}, secondsUntilRefresh * 1000);
-	}
+refresh = readCookie(refreshCookieName);
+if (refresh === null) {
+  refresh = refreshCookieCount;
+}
+else {
+  refresh -= 1;
+}
+createCookie(refreshCookieName, refresh, 1);
+if (!refresh) {
+  setTimeout(function () { location.href = location.href; }, secondsUntilRefresh * 1000);
+}
 ]]>
   </script>  
   </head>
@@ -270,6 +238,7 @@ def build_html():
     return html
 
 def _git_publish(fn):
+    log.info("\nPublishing to GitHub Pages now...\n")
     subprocess.call(["git", 
                      "commit", 
                      "-m'Automated commit from oration.generate_html at %s'" % datetime.datetime.utcnow().isoformat(),
@@ -313,16 +282,15 @@ if __name__ == "__main__":
         while True:
             html_content = build_html()
             with open(EXPORT_FILENAME, "w") as f:
-                et = etree.ElementTree(html_content)
-                et.write(f, pretty_print=True)
+                f.write(lxml.html.tostring(html_content, pretty_print=True))
 
             _git_publish(EXPORT_FILENAME)
 
-
-
+            log.info("\nNow sleeping %s seconds...\n" % CONTINUOUS_WAIT_SECONDS)
+            time.sleep(CONTINUOUS_WAIT_SECONDS)
     else:
         html_content = build_html()
         with open(EXPORT_FILENAME, "w") as f:
-            et = etree.ElementTree(html_content)
-            et.write(f, pretty_print=True)
+            lxml.html.tostring(html_content)
+            f.write(lxml.html.tostring(html_content, pretty_print=True))
 
