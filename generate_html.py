@@ -38,6 +38,56 @@ HTML_TEMPLATE = """<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 
     <script src="foundation/javascripts/modernizr.foundation.js">
     </script>
+    <script type="text/javascript">
+    <![CDATA[
+
+        var refresh, 
+	    refreshCookieName = "refresh", 
+	    refreshCookieCount = 10, 
+	    secondsUntilRefresh = 60;
+	// Thanks, PPK!
+	function createCookie(name,value,days) {
+		var expires, date = new Date();
+		if (days) {
+			date.setTime(date.getTime()+(days*24*60*60*1000));
+			expires = "; expires="+date.toGMTString();
+		}
+		else {
+			expires = "";
+		}
+		document.cookie = name+"="+value+expires+"; path=/";
+    }
+
+	function readCookie(name) {
+		var nameEQ = name + "=",
+		    ca = document.cookie.split(';');
+		for(i=0;i < ca.length;i++) {
+
+			var c = ca[i];
+			while (c.charAt(0)==' ') {
+				c = c.substring(1,c.length);
+			}
+			if (c.indexOf(nameEQ) === 0) {
+				return c.substring(nameEQ.length,c.length);
+			}
+		}
+		return null;
+	}
+	refresh = readCookie(refreshCookieName);
+	if (refresh === null) {
+		refresh = refreshCookieCount;
+	}
+	else {
+		refresh -= 1;
+	}
+	createCookie(refreshCookieName, refresh, 1);
+        if (refresh > 0) {
+		setTimeout(function () {
+			location.href = location.href;
+			}, secondsUntilRefresh * 1000);
+	}
+]]>
+  </script>  
   </head>
 
   <body>
@@ -111,60 +161,60 @@ def build_html():
         slide_tweets = _match_tweets(tweet_search_results, created_time, next_created_time)
         log.debug("Matching tweets for slide %s [%s]: %s" % (i, created_time, slide_tweets))
 
-        if i % 2:
-            if i == 3:
-                slide_tweets = [{'text': u'This is totally not a test tweet #bib12', 
-                                 'when': created_time, 
-                                 'from_name': "Keith Fahlgren",
-                                 'from_at_name': "@abdelazer",
-                                 'from_url': "https://twitter.com/abdelazer",
-                                 'permalink': "https://twitter.com/abdelazer/status/260541769521979392",
-                                 'avatar': u'https://twimg0-a.akamaihd.net/profile_images/1884823295/k_baylands_sq_normal.jpg'},
-                                {'text': u'Neither is this. @abdelazer: This is totally not a test tweet #bib12', 
-                                 'when': created_time, 
-                                 'from_name': "Liza Daly",
-                                 'from_at_name': "@liza",
-                                 'from_url': "https://twitter.com/liza",
-                                 'permalink': "https://twitter.com/liza/status/260542218044076032",
-                                 'avatar': u'https://si0.twimg.com/profile_images/1448591106/liza-headshot-light-square_normal.jpg'},
-                                {'permalink': u'https://twitter.com/BiblioCrunch/statuses/260953774904971264',
-                                 'from_name': u'BiblioCrunch', 
-                                 'from_at_name': u'@BiblioCrunch', 
-                                 'text': u"Don't miss the @BiblioCrunch presenation on authoring platforms at #BIB12 Oct. 25th http://t.co/eqytczqr", 
-                                 'when': created_time,
-                                 'avatar': u'https://si0.twimg.com/profile_images/2576727093/joe8u53szbk047f49rf4_normal.jpeg',
-                                 'from_url': u'https://twitter.com/BiblioCrunch'}, 
-                                {'permalink': u'https://twitter.com/concisekathryn/statuses/260942171442671616', 
-                                 'from_name': u'Kathryn', 
-                                 'from_at_name': u'@concisekathryn', 
-                                 'text': u'so excited to be going to #bib12 in San Francisco this week!', 
-                                 'when': created_time,
-                                 'avatar': u'https://si0.twimg.com/profile_images/2675712735/93d52cedfdaf7eb2c288c93b110803d1_normal.png',
-                                 'from_url': u'https://twitter.com/concisekathryn'}, 
-                                {'permalink': u'https://twitter.com/agwieckowski/statuses/260924856613343233', 
-                                 'from_name': u'Ania Wieckowski', 
-                                 'from_at_name': u'@agwieckowski', 
-                                 'text': u'All packed for #bib12! Looking forward to seeing all you folks.', 
-                                 'when': created_time,
-                                 'avatar': u'https://si0.twimg.com/profile_images/1813017413/headshot1bwf_normal.jpg',
-                                 'from_url': u'https://twitter.com/agwieckowski'}, 
-                                {'permalink':
-                                 u'https://twitter.com/hughmcguire/statuses/260917610160472064', 
-                                 'from_name': u'Hugh McGuire', 
-                                 'from_at_name': u'@hughmcguire', 
-                                 'text': u'in sf for #bib12 ... anyone wanna grab a bite?', 
-                                 'when': created_time,
-                                 'avatar': u'https://si0.twimg.com/profile_images/1766808641/hugh-lookout_normal.jpg',
-                                 'from_url': u'https://twitter.com/hughmcguire'}, 
-                                {'permalink': u'https://twitter.com/Porter_Anderson/statuses/260897182373253120',
-                                 'from_name': u'Porter Anderson', 
-                                 'from_at_name': u'@Porter_Anderson', 
-                                 'text': u'"@CreativeCommons..up against the border of the commercial content world." @copyrightandtec w/ @jwikert http://t.co/JbJ5o6xY #BiB12 #TOCcon', 
-                                 'when': created_time, 
-                                 'avatar': u'https://si0.twimg.com/profile_images/1218111533/Porter_Anderson_thumb_close2__Photo_Jeff_Cohen__normal.jpg',
-                                 'from_url': u'https://twitter.com/Porter_Anderson'}
-                               ]
-
+#        if i % 2:
+#            if i == 3:
+#                slide_tweets = [{'text': u'This is totally not a test tweet #bib12', 
+#                                 'when': created_time, 
+#                                 'from_name': "Keith Fahlgren",
+#                                 'from_at_name': "@abdelazer",
+#                                 'from_url': "https://twitter.com/abdelazer",
+#                                 'permalink': "https://twitter.com/abdelazer/status/260541769521979392",
+#                                 'avatar': u'https://twimg0-a.akamaihd.net/profile_images/1884823295/k_baylands_sq_normal.jpg'},
+#                                {'text': u'Neither is this. @abdelazer: This is totally not a test tweet #bib12', 
+#                                 'when': created_time, 
+#                                 'from_name': "Liza Daly",
+#                                 'from_at_name': "@liza",
+#                                 'from_url': "https://twitter.com/liza",
+#                                 'permalink': "https://twitter.com/liza/status/260542218044076032",
+#                                 'avatar': u'https://si0.twimg.com/profile_images/1448591106/liza-headshot-light-square_normal.jpg'},
+#                                {'permalink': u'https://twitter.com/BiblioCrunch/statuses/260953774904971264',
+#                                 'from_name': u'BiblioCrunch', 
+#                                 'from_at_name': u'@BiblioCrunch', 
+#                                 'text': u"Don't miss the @BiblioCrunch presenation on authoring platforms at #BIB12 Oct. 25th http://t.co/eqytczqr", 
+#                                 'when': created_time,
+#                                 'avatar': u'https://si0.twimg.com/profile_images/2576727093/joe8u53szbk047f49rf4_normal.jpeg',
+#                                 'from_url': u'https://twitter.com/BiblioCrunch'}, 
+#                                {'permalink': u'https://twitter.com/concisekathryn/statuses/260942171442671616', 
+#                                 'from_name': u'Kathryn', 
+#                                 'from_at_name': u'@concisekathryn', 
+#                                 'text': u'so excited to be going to #bib12 in San Francisco this week!', 
+#                                 'when': created_time,
+#                                 'avatar': u'https://si0.twimg.com/profile_images/2675712735/93d52cedfdaf7eb2c288c93b110803d1_normal.png',
+#                                 'from_url': u'https://twitter.com/concisekathryn'}, 
+#                                {'permalink': u'https://twitter.com/agwieckowski/statuses/260924856613343233', 
+#                                 'from_name': u'Ania Wieckowski', 
+#                                 'from_at_name': u'@agwieckowski', 
+#                                 'text': u'All packed for #bib12! Looking forward to seeing all you folks.', 
+#                                 'when': created_time,
+#                                 'avatar': u'https://si0.twimg.com/profile_images/1813017413/headshot1bwf_normal.jpg',
+#                                 'from_url': u'https://twitter.com/agwieckowski'}, 
+#                                {'permalink':
+#                                 u'https://twitter.com/hughmcguire/statuses/260917610160472064', 
+#                                 'from_name': u'Hugh McGuire', 
+#                                 'from_at_name': u'@hughmcguire', 
+#                                 'text': u'in sf for #bib12 ... anyone wanna grab a bite?', 
+#                                 'when': created_time,
+#                                 'avatar': u'https://si0.twimg.com/profile_images/1766808641/hugh-lookout_normal.jpg',
+#                                 'from_url': u'https://twitter.com/hughmcguire'}, 
+#                                {'permalink': u'https://twitter.com/Porter_Anderson/statuses/260897182373253120',
+#                                 'from_name': u'Porter Anderson', 
+#                                 'from_at_name': u'@Porter_Anderson', 
+#                                 'text': u'"@CreativeCommons..up against the border of the commercial content world." @copyrightandtec w/ @jwikert http://t.co/JbJ5o6xY #BiB12 #TOCcon', 
+#                                 'when': created_time, 
+#                                 'avatar': u'https://si0.twimg.com/profile_images/1218111533/Porter_Anderson_thumb_close2__Photo_Jeff_Cohen__normal.jpg',
+#                                 'from_url': u'https://twitter.com/Porter_Anderson'}
+#                               ]
+#
 
         for tweet in slide_tweets:
             p = etree.SubElement(tweets_div, XHTML + "p", nsmap=NSMAP)
