@@ -44,17 +44,6 @@ HTML_TEMPLATE = """<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
   </body>
 </html>"""
 
-# Tweet alignment (from Matthew)
-# so get all the tweets, use data-ts (or something like it)
-# and for each slide, find the first tweet where the ts is > the slide ts (but less than the next)
-# but the key is to make them all position: relative
-# to get collision detection
-# so that you're only adjusting when you need to slide all of them down
-# so set the css('top') of the tweet w/the offset().top of the slide
-# you might have to calculate it
-# get offset().top of both, find the difference, and then that will be the css('top') you want to set
-# but the tweets after the first one should just fall under it after you adjust it
-
 logging.basicConfig(level=logging.DEBUG)
 
 log = logging.getLogger(__name__)
@@ -97,6 +86,13 @@ def build_html():
         tweets_div.set("class", "tweets three columns")
         tweets_div.text = " "
 
+        top_gradient = etree.SubElement(section, XHTML + "span", nsmap=NSMAP) 
+        top_gradient.set("class", "top-gradient")
+        top_gradient.text = " "
+        bottom_gradient = etree.SubElement(section, XHTML + "span", nsmap=NSMAP) 
+        bottom_gradient.set("class", "bottom-gradient")
+        bottom_gradient.text = " "
+
         #log.debug(etree.tostring(slide))
         for slide_body_child in slide_body:
             num_comments = len(slide_body_child.xpath(".//x:a[starts-with(@href, '#cmnt_ref')]", namespaces=NSS))
@@ -115,26 +111,100 @@ def build_html():
         slide_tweets = _match_tweets(tweet_search_results, created_time, next_created_time)
         log.debug("Matching tweets for slide %s [%s]: %s" % (i, created_time, slide_tweets))
 
-        #if i % 2:
-        #    if i == 3:
-        #        slide_tweets = [{'text': u'This is totally not a test tweet #bib12', 'when': created_time, 'avatar': u'https://twimg0-a.akamaihd.net/profile_images/1884823295/k_baylands_sq_normal.jpg'},
-        #                        {'text': u'Neither is this. @abdelazer: This is totally not a test tweet #bib12', 'when': created_time, 'avatar': u'https://si0.twimg.com/profile_images/1448591106/liza-headshot-light-square_normal.jpg'}]
-        #    else:
-        #        slide_tweets = [{'text': u'Neither is this. @abdelazer: This is totally not a test tweet #bib12', 'when': created_time, 'avatar': u'https://si0.twimg.com/profile_images/1448591106/liza-headshot-light-square_normal.jpg'}]
+        if i % 2:
+            if i == 3:
+                slide_tweets = [{'text': u'This is totally not a test tweet #bib12', 
+                                 'when': created_time, 
+                                 'from_name': "Keith Fahlgren",
+                                 'from_at_name': "@abdelazer",
+                                 'from_url': "https://twitter.com/abdelazer",
+                                 'permalink': "https://twitter.com/abdelazer/status/260541769521979392",
+                                 'avatar': u'https://twimg0-a.akamaihd.net/profile_images/1884823295/k_baylands_sq_normal.jpg'},
+                                {'text': u'Neither is this. @abdelazer: This is totally not a test tweet #bib12', 
+                                 'when': created_time, 
+                                 'from_name': "Liza Daly",
+                                 'from_at_name': "@liza",
+                                 'from_url': "https://twitter.com/liza",
+                                 'permalink': "https://twitter.com/liza/status/260542218044076032",
+                                 'avatar': u'https://si0.twimg.com/profile_images/1448591106/liza-headshot-light-square_normal.jpg'},
+                                {'permalink': u'https://twitter.com/BiblioCrunch/statuses/260953774904971264',
+                                 'from_name': u'BiblioCrunch', 
+                                 'from_at_name': u'@BiblioCrunch', 
+                                 'text': u"Don't miss the @BiblioCrunch presenation on authoring platforms at #BIB12 Oct. 25th http://t.co/eqytczqr", 
+                                 'when': created_time,
+                                 'avatar': u'https://si0.twimg.com/profile_images/2576727093/joe8u53szbk047f49rf4_normal.jpeg',
+                                 'from_url': u'https://twitter.com/BiblioCrunch'}, 
+                                {'permalink': u'https://twitter.com/concisekathryn/statuses/260942171442671616', 
+                                 'from_name': u'Kathryn', 
+                                 'from_at_name': u'@concisekathryn', 
+                                 'text': u'so excited to be going to #bib12 in San Francisco this week!', 
+                                 'when': created_time,
+                                 'avatar': u'https://si0.twimg.com/profile_images/2675712735/93d52cedfdaf7eb2c288c93b110803d1_normal.png',
+                                 'from_url': u'https://twitter.com/concisekathryn'}, 
+                                {'permalink': u'https://twitter.com/agwieckowski/statuses/260924856613343233', 
+                                 'from_name': u'Ania Wieckowski', 
+                                 'from_at_name': u'@agwieckowski', 
+                                 'text': u'All packed for #bib12! Looking forward to seeing all you folks.', 
+                                 'when': created_time,
+                                 'avatar': u'https://si0.twimg.com/profile_images/1813017413/headshot1bwf_normal.jpg',
+                                 'from_url': u'https://twitter.com/agwieckowski'}, 
+                                {'permalink':
+                                 u'https://twitter.com/hughmcguire/statuses/260917610160472064', 
+                                 'from_name': u'Hugh McGuire', 
+                                 'from_at_name': u'@hughmcguire', 
+                                 'text': u'in sf for #bib12 ... anyone wanna grab a bite?', 
+                                 'when': created_time,
+                                 'avatar': u'https://si0.twimg.com/profile_images/1766808641/hugh-lookout_normal.jpg',
+                                 'from_url': u'https://twitter.com/hughmcguire'}, 
+                                {'permalink': u'https://twitter.com/Porter_Anderson/statuses/260897182373253120',
+                                 'from_name': u'Porter Anderson', 
+                                 'from_at_name': u'@Porter_Anderson', 
+                                 'text': u'"@CreativeCommons..up against the border of the commercial content world." @copyrightandtec w/ @jwikert http://t.co/JbJ5o6xY #BiB12 #TOCcon', 
+                                 'when': created_time, 
+                                 'avatar': u'https://si0.twimg.com/profile_images/1218111533/Porter_Anderson_thumb_close2__Photo_Jeff_Cohen__normal.jpg',
+                                 'from_url': u'https://twitter.com/Porter_Anderson'}
+                               ]
 
 
         for tweet in slide_tweets:
             p = etree.SubElement(tweets_div, XHTML + "p", nsmap=NSMAP)
             p.set("class", "tweet")
+
+            who = etree.SubElement(p, XHTML + "span", nsmap=NSMAP)
+            who.set("class", "tweet-who")
+            who_a = etree.SubElement(who, XHTML + "a", nsmap=NSMAP)
+            who_a.set("href", tweet["from_url"])
+            who_a.text = tweet["from_name"]
+
+            who_user = etree.SubElement(p, XHTML + "span", nsmap=NSMAP)
+            who_user.set("class", "tweet-who-at")
+            who_user_a = etree.SubElement(who_user, XHTML + "a", nsmap=NSMAP)
+            who_user_a.set("href", tweet["from_url"])
+            who_user_a.text = tweet["from_at_name"]
+
+            follow_iframe = etree.SubElement(p, XHTML + "iframe", nsmap=NSMAP)
+            follow_iframe.set("allowtransparency", "true")
+            follow_iframe.set("frameborder", "0")
+            follow_iframe.set("scrolling", "no")
+            follow_iframe.set("src", "//platform.twitter.com/widgets/follow_button.html?screen_name=%s&show_count=false&show_screen_name=false" % tweet["from_at_name"].lstrip("@"))
+            follow_iframe.set("style", "width: 300px; height:20px;")
+            follow_iframe.text = " "
+    
+
             txt = etree.SubElement(p, XHTML + "span", nsmap=NSMAP)
             txt.text = tweet['text']
             txt.set("class", "tweet-text")
             when = etree.SubElement(p, XHTML + "span", nsmap=NSMAP)
-            when.text = tweet['when']
             when.set("class", "tweet-when")
-            avatar = etree.SubElement(p, XHTML + "img", nsmap=NSMAP)
-            avatar.set("src", tweet['avatar'])
+            when_a = etree.SubElement(when, XHTML + "a", nsmap=NSMAP)
+            when_a.set("href", tweet['permalink'])
+            when_a.text = tweet['when']
+
+            avatar = etree.SubElement(p, XHTML + "a", nsmap=NSMAP)
+            avatar.set("href", tweet["from_url"])
             avatar.set("class", "tweet-avatar")
+            avatar_img = etree.SubElement(avatar, XHTML + "img", nsmap=NSMAP)
+            avatar_img.set("src", tweet['avatar'])
 
 
         body.append(section)

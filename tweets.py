@@ -65,12 +65,20 @@ def hashtag_search_in_daterange(start, end):
                 avatar = valid_tweet['profile_image_url_https']
                 when = datetime.datetime.strptime(valid_tweet['created_at'],
                         TWITTER_WTF_DATE_FMT).isoformat('T')
+                from_name = valid_tweet['from_user_name']
+                from_at_name = u"@%s" % valid_tweet['from_user']
+                from_url = u"https://twitter.com/%s" % valid_tweet['from_user']
+                permalink = u"https://twitter.com/%s/statuses/%s" % (valid_tweet['from_user'], valid_tweet['id_str'])
 
                 # INFO:tweets:@naypinya Looking forward to the Books in Browsers conference. @RedBridgePress #bib12 at 2012-10-17T16:39:51
                 # INFO:tweets:RT @gunzalis: @raffers @dinoboy89 @samatlounge I am not. I'm sweating my #bib12 talk instead in NorCal. at 2012-10-17T16:17:48
                 tweet = {'text': valid_tweet['text'],
-                        'avatar': avatar,
-                        'when': when}
+                         'avatar': avatar,
+                         'from_name': from_name,
+                         'from_at_name': from_at_name,
+                         'from_url': from_url,
+                         'permalink': permalink,
+                         'when': when}
                 tweets.append(tweet)
         except AllTweetsFoundError:
             break
