@@ -80,6 +80,13 @@ def build_html():
     children = docs.folder_contents(service)
     sorted_children = sorted(children, key=lambda x: x['createdDate'])
 
+    action_call = etree.SubElement(body, XHTML + "p", nsmap=NSMAP)
+    action_call_strong = etree.SubElement(action_call, XHTML + "strong", nsmap=NSMAP)
+    action_call_strong.text = "Edit, correct, and comment on the source here: "
+    action_call_a = etree.SubElement(action_call_strong, XHTML + "a", nsmap=NSMAP)
+    action_call_a.set("href", "http://bit.ly/sbobib12source")
+    action_call_a.text = "http://bit.ly/sbobib12source"
+
     start = sorted_children[0]['createdDate']
     last_start = sorted_children[-1]['createdDate']
     # Add a minute to 2012-10-21T18:18:45.610Z
@@ -105,6 +112,7 @@ def build_html():
         slide_div = etree.SubElement(section, XHTML + "div", nsmap=NSMAP)
         slide_div.set("class", "slide six columns")
         slide_div.tail = "\n"
+
 
         tweets_div = etree.SubElement(section, XHTML + "div", nsmap=NSMAP) 
         tweets_div.set("class", "tweets three columns")
