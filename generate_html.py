@@ -100,13 +100,16 @@ def build_html():
         comments_div = etree.SubElement(section, XHTML + "div", nsmap=NSMAP) 
         comments_div.set("class", "comments three columns")
         comments_div.text = " "
+        comments_div.tail = "\n"
 
         slide_div = etree.SubElement(section, XHTML + "div", nsmap=NSMAP)
         slide_div.set("class", "slide six columns")
+        slide_div.tail = "\n"
 
         tweets_div = etree.SubElement(section, XHTML + "div", nsmap=NSMAP) 
         tweets_div.set("class", "tweets three columns")
         tweets_div.text = " "
+        tweets_div.tail = "\n"
 
         top_gradient = etree.SubElement(section, XHTML + "span", nsmap=NSMAP) 
         top_gradient.set("class", "top-gradient")
@@ -228,13 +231,13 @@ def build_html():
             when_a = etree.SubElement(when, XHTML + "a", nsmap=NSMAP)
             when_a.set("href", tweet['permalink'])
             when_a.text = tweet['when']
+            
+            p.tail = "\n"
 
+        section.tail = "\n"
 
         body.append(section)
 
-
-
-    # Collect all the relevant tweets and try to line them up
     return html
 
 def _git_publish(fn):
