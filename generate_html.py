@@ -46,9 +46,6 @@ HTML_TEMPLATE = """<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
     <script src="foundation/javascripts/sbo.js">
     </script>
     <script type="text/javascript">
-    <![CDATA[
-setTimeout(function () { window.location.reload(true); }, 30 * 1000);
-]]>
   </script>  
   </head>
 
