@@ -47,7 +47,7 @@ HTML_TEMPLATE = """<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
     </script>
     <script type="text/javascript">
     <![CDATA[
-setTimeout(function () { window.location.reload(true); }, 10 * 1000);
+setTimeout(function () { window.location.reload(true); }, 30 * 1000);
 ]]>
   </script>  
   </head>
