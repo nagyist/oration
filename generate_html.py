@@ -47,17 +47,7 @@ HTML_TEMPLATE = """<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
     </script>
     <script type="text/javascript">
     <![CDATA[
-refresh = readCookie(refreshCookieName);
-if (refresh === null) {
-  refresh = refreshCookieCount;
-}
-else {
-  refresh -= 1;
-}
-createCookie(refreshCookieName, refresh, 1);
-if (!refresh) {
-  setTimeout(function () { location.href = location.href; }, secondsUntilRefresh * 1000);
-}
+setTimeout(function () { window.location.reload(true); }, 10 * 1000);
 ]]>
   </script>  
   </head>
@@ -89,10 +79,11 @@ def build_html():
 
     start = sorted_children[0]['createdDate']
     last_start = sorted_children[-1]['createdDate']
-    # Add a minute to 2012-10-21T18:18:45.610Z
+    # Add 5 minutes to 2012-10-21T18:18:45.610Z
     last_start_split = last_start.split(":")
-    add_two_minutes = str(float(last_start_split[2].rstrip("Z")) + 2)
-    end = ":".join([last_start_split[0], last_start_split[1], add_two_minutes]) + "Z"
+    num_minutes = 5
+    add_some_minutes = str(float(last_start_split[2].rstrip("Z")) + num_minutes)
+    end = ":".join([last_start_split[0], last_start_split[1], add_some_minutes]) + "Z"
     tweet_search_results = tweets.hashtag_search_in_daterange(start, end)
 
     for i, child in enumerate(sorted_children):
