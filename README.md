@@ -1,7 +1,8 @@
 Oration
 =======
 
-Oration captures a conference presentation as static HTML.
+Oration transforms a series of Google Docs inside a folder into a presentation with static HTML in
+the center, Google Doc comments on the left, and Tweets matching a hashtag on the right..
 
 Developer Setup
 ~~~~~~~~~~~~~~~

@@ -5,7 +5,7 @@ version = '0.1'
 
 setup(name='oration',
       version=version,
-      description="Oration captures a conference presentation",
+      description="Oration captures a set of Google Docs and tweets as interesting HTML",
       long_description="""\
 """,
       classifiers=[], # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
